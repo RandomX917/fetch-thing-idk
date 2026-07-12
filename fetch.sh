@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -- $'\033[34m' $'\033[36m' $'\033[0m'
+
 cpu="$( grep 'model name' /proc/cpuinfo | uniq | cut -d: -f2)"
 total="$(free -m | awk '/^Mem:/ {print $2}')"
 used="$(free -m | awk '/^Mem:/ {print $3}')"
@@ -7,7 +7,7 @@ pct="$(( used * 100 / total ))"
 if [ -z "$XDG_CURRENT_DESKTOP" ]; then
 wmde=""
 else
-wmde="WM/DE: $3 $XDG_CURRENT_DESKTOP"
+wmde="WM/DE:\033[0m $XDG_CURRENT_DESKTOP"
 fi
 if [ -f /etc/os-release ]; then
     . /etc/os-release
@@ -15,6 +15,8 @@ if [ -f /etc/os-release ]; then
 else
     os="$(uname -s)"
 fi
+if [[ "$os"==NixOS* ]]; then
+set -- $'\033[34m' $'\033[36m' $'\033[0m'
 echo -e "\
 $1        __   $2 ____    __
 $1       /##\\   $2\\###\\  /##\\
@@ -35,4 +37,26 @@ $1       /###/\\###\\$2   \\###\\
 $1       \\##/  \\###\\$2   \\##/
 $1        ‾‾    ‾‾‾‾$2    ‾‾
 $3"
-
+else
+	set -- $'\033[0m' $'\033[0m' $'\033[0m'
+echo -e "
+$3 #####             #####
+$3 #####     ###     #####
+$3 ###     ######      ###
+$3 ###    ###   ###    ###   OS: $os
+$3 ###   ###     ###   ###   SHELL: $(basename "$SHELL")
+$3 ###           ###   ###   CPU: $cpu
+$3 ###           ###   ###   Mem $used""MB / $total""MB ($pct%)
+$3 ###           ###   ###   $wmde
+$3 ###          ###    ###
+$3 ###         ###     ###
+$3 ###        ###      ###
+$3 ###       ###       ###
+$3 ###       ###       ###
+$3 ###       ###       ###
+$3 ###                 ### 
+$3 ###       ###       ###
+$3 #####     ###     #####
+$3 #####     ###     #####
+"
+fi
