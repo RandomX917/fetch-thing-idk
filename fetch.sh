@@ -9,20 +9,29 @@ wmde=""
 else
 wmde="WM/DE:\033[0m $XDG_CURRENT_DESKTOP"
 fi
+#if [ -f /etc/os-release ]; then
+#    . /etc/os-release
+#    os="$PRETTY_NAME"
+#else
+#    os="$(uname -s)"
+#fi
 if [ -f /etc/os-release ]; then
     . /etc/os-release
-    os="$PRETTY_NAME"
+    os="$ID"
+    osv="$VERSION"
 else
-    os="$(uname -s)"
+    os="$(uname -s | tr '[:upper:]' '[:lower:]')"
+    osv=""
 fi
-if [[ "$os"==NixOS* ]]; then
-set -- $'\033[34m' $'\033[36m' $'\033[0m'
+case "$os" in
+    "nixos")
+        set -- $'\033[34m' $'\033[36m' $'\033[0m'
 echo -e "\
 $1        __   $2 ____    __
 $1       /##\\   $2\\###\\  /##\\
 $1       \\###\\   $2\\###\\/###/
 $1     ___\\###\\___$2\\######/
-$1    /############$2\\####/   $1/\\     $1 OS:$3 $os
+$1    /############$2\\####/   $1/\\     $1 OS:$3 $os $osv
 $1   /##############$2\\###\\  $1/##\\    $2 Shell:$3 $(basename "$SHELL")
 $1   ‾‾‾‾‾$2/###/$1‾‾‾‾‾ $2\\###\\$1/###/   $1  CPU:$3$cpu
 $2 ______/###/        $2\\##$1/###/___  $2 Mem:$3 $used""MB / $total""MB ($pct%)
@@ -37,8 +46,11 @@ $1       /###/\\###\\$2   \\###\\
 $1       \\##/  \\###\\$2   \\##/
 $1        ‾‾    ‾‾‾‾$2    ‾‾
 $3"
-else
-	set -- $'\033[0m' $'\033[0m' $'\033[0m'
+        ;;
+    "")#left this blank 4 later
+        ;;
+    *)
+		set -- $'\033[0m' $'\033[0m' $'\033[0m'
 echo -e "
 $3 #####             #####
 $3 #####     ###     #####
@@ -59,4 +71,5 @@ $3 ###       ###       ###
 $3 #####     ###     #####
 $3 #####     ###     #####
 "
-fi
+        ;;
+esac
